@@ -1,0 +1,12 @@
+---
+# defaults file for pronoide.apache_httpd
+apache_user: apache
+apache_group: apache
+apache_port: 88
+closed_ports:
+  - port: 80
+    protocol: tcp
+  - port: 81
+    protocol: tcp
+  - port: 88
+    protocol: udp

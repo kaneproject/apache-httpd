@@ -1,0 +1,6 @@
+---
+# handlers file for pronoide.apache_httpd
+- name: Nombre obligatorio
+  service:
+    name: httpd
+    state: started

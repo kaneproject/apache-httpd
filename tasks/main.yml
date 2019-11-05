@@ -1,0 +1,55 @@
+---
+# tasks file for pronoide.apache_httpd
+- name: Instalar apache
+  package:
+    name: httpd
+    state: installed
+- name: Copiar la configuracion de httpd
+  template:
+    src: httpd.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Nombre obligatorio
+- name: Garantizar que el firewall esta levantador y activado
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+- name: Abrir el puerto {{ apache_port }} en el firewall
+  firewalld:
+    port: '{{ apache_port }}/tcp'
+    state: enabled
+    permanent: yes
+    immediate: yes
+- debug:
+    msg: "Evaluo item.protocol: {{ item.port }}/{{ item.protocol }}"
+    verbosity: 2
+  loop: "{{ closed_ports }}"
+- name: Cerrar el resto de puertos
+  firewalld:
+    port: '{{ item.port }}/{{ item.protocol }}'
+    permanent: yes
+    state: disabled
+    immediate: yes
+  loop: "{{ closed_ports }}"
+- name: Garantizar existencia y permisos del directorio html
+  file:
+    path: /var/www/html/
+    state: directory
+    owner: '{{ apache_user }}'
+    group: '{{ apache_group }}'
+    mode: 0755
+- name: Copiar el portal (página que se muestra)
+  copy:
+    src: index.html
+    dest: /var/www/html/
+    owner: '{{ apache_user }}'
+    group: '{{ apache_group }}'
+- name: Iniciar y automatizar el servicio
+  service:
+    name: httpd
+    state: started
+    enabled: yes
